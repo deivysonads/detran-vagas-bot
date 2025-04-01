@@ -22,7 +22,7 @@ async function checarVagas() {
   try {
     await page.goto("https://www.detran.al.gov.br/habilitacao/agendamento-de-exames/", { waitUntil: "networkidle0", timeout: 60000 });
 
-    await page.waitForSelector("#cpf", { timeout: 60000 });
+    await page.waitForSelector("#cpf", { timeout: 20000 });
     await page.type("#cpf", "13021791441");
     await page.select("#nacionalidade", "Brasileira");
     await page.select("#ufNascimento", "Pernambuco");
@@ -49,6 +49,7 @@ async function checarVagas() {
   } catch (err) {
     console.error("Erro ao checar vagas:", err.message);
   } finally {
+    await page.screenshot({ path: "pagina-atual.png", fullPage: true });
     await browser.close();
   }
 }
