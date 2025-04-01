@@ -1,4 +1,4 @@
-const puppeteer = require("puppeteer-core");
+const puppeteer = require("puppeteer");
 const cron = require("node-cron");
 const axios = require("axios");
 
@@ -12,7 +12,6 @@ const remetente = {
 
 async function checarVagas() {
   const browser = await puppeteer.launch({
-    executablePath: "/usr/bin/chromium",
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
@@ -98,5 +97,5 @@ cron.schedule("0 20 * * *", () => {
   enviarResumoSemVaga();
 });
 
-
+// Execução imediata ao iniciar
 checarVagas();
