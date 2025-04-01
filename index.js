@@ -97,3 +97,6 @@ cron.schedule("*/10 * * * *", () => {
 cron.schedule("0 20 * * *", () => {
   enviarResumoSemVaga();
 });
+
+
+checarVagas();
