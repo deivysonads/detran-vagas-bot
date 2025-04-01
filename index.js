@@ -1,9 +1,9 @@
-const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-core");
 const cron = require("node-cron");
 const axios = require("axios");
 
-const BREVO_API_KEY = "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";
-const EMAIL_DESTINO = "seuemail@exemplo.com"; // <-- Troque aqui pelo seu email real
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
+const EMAIL_DESTINO = process.env.EMAIL_DESTINO;
 
 const remetente = {
   name: "Vagas dentra",
@@ -11,13 +11,16 @@ const remetente = {
 };
 
 async function checarVagas() {
-  const browser = await puppeteer.launch({ headless: "new" });
+  const browser = await puppeteer.launch({
+    executablePath: "/usr/bin/chromium-browser",
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
   const page = await browser.newPage();
 
   try {
     await page.goto("https://www.detran.al.gov.br/habilitacao/agendamento-de-exames/", { waitUntil: "domcontentloaded" });
 
-    // Etapa 1
     await page.type("#cpf", "13021791441");
     await page.select("#nacionalidade", "Brasileira");
     await page.select("#ufNascimento", "Pernambuco");
@@ -26,14 +29,12 @@ async function checarVagas() {
     await page.click("button[type=submit]");
     await page.waitForNavigation();
 
-    // Etapa 2
     await page.select("#tipoExame", "Pratico");
     await page.select("#categoria", "B");
     await page.select("#localExame", "Maceio, Avenida Menino Marcelo num 99, Cidade Universitária, DETRAN SEDE");
     await page.click("button[type=submit]");
     await page.waitForNavigation();
 
-    // Etapa 3
     const msg = await page.$eval(".alert-danger", el => el.innerText.trim());
 
     if (!msg.includes("NÃO HÁ VAGAS DISPONÍVEIS")) {
@@ -88,13 +89,11 @@ async function enviarResumoSemVaga() {
   });
 }
 
-// Agendamento: checar a cada 10 minutos
 cron.schedule("*/10 * * * *", () => {
   console.log("🔎 Verificando vagas...");
   checarVagas();
 });
 
-// Enviar e-mail diário às 20:00h se nenhuma vaga foi encontrada
 cron.schedule("0 20 * * *", () => {
   enviarResumoSemVaga();
 });
